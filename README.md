@@ -1,42 +1,104 @@
-# zookeeper Cookbook
+# OMC zookeeper Cookbook
 
-TODO: Enter the cookbook description here.
-
-e.g.
-This cookbook makes your favorite breakfast sandwich.
+Exposes two LWRPs for installing and configuring a zookeeper node (omc_zookeeper_node & omc_zookeeper_config).
 
 ## Requirements
 
-TODO: List your cookbook requirements. Be sure to include any requirements this cookbook has on platforms, libraries, other cookbooks, packages, operating systems, etc.
-
-e.g.
-#### packages
-- `toaster` - zookeeper needs toaster to brown your bagel.
+This coobook requires Java and uses the relevant cookbook to install it. The dependency is defined in the Berksfile & metadata.rb
 
 ## Attributes
 
-TODO: List your cookbook attributes here.
+[:config][:ensemble] = [] # csv list of hostnames that are part of the zookeeper ensemble
+[:config][:client_port] = '2181' # Zookeeper client port 
+[:config][:leader_port] = '3888' # Zookeeper leader election port
+[:config][:quorum_port] = '2888' # Zookeeper quorum port
 
-e.g.
-#### zookeeper::default
+All items of the properties object will get passed to zoo.cfg. If there's any additional configuration that needs to get added there then simply add a new property key:value pair
+[:config][:properties][:clientPort] = '2181'
+[:config][:properties][:initLimit] = '10'
+[:config][:properties][:syncLimit] = '5'
+[:config][:properties][:tickTime] = '2000'
+
+[:package][:dir_conf] = '/opt/zookeeper/conf' # Zookeeper config path
+[:package][:dir_data] = '/scratch/zookeeper/data' # Zookeeper data path
+[:package][:install_path] = '/opt/zookeeper' # Zookeeper home directory
+[:package][:source_url] = 'http://www.us.apache.org/dist/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz' # Zookeeper archive url
+[:package][:version] = '3.4.6' # Zookeeper version
+
+[:user][:username] = 'zookeeper' # Zookeeper user / group / home directory and shell
+[:user][:group] = 'zookeeper'
+[:user][:home] = '/opt/zk_home'
+[:user][:shell] = '/bin/bash'
+
+
+
+#### (LWRP) omc_zookeeper_node
 <table>
   <tr>
-    <th>Key</th>
+    <th>Attribute</th>
     <th>Type</th>
     <th>Description</th>
     <th>Default</th>
   </tr>
   <tr>
-    <td><tt>['zookeeper']['bacon']</tt></td>
-    <td>Boolean</td>
-    <td>whether to include bacon</td>
-    <td><tt>true</tt></td>
+    <td><tt>user</tt></td>
+    <td>zookeeper</td>
+    <td>User under which the zookeeper service will be running as</td>
+    <td><tt>zookeeper</tt></td>
+  </tr>
+  <tr>
+    <td><tt>group</tt></td>
+    <td>zookeeper</td>
+    <td>Group of users that own zookeeper</td>
+    <td><tt>zookeeper</tt></td>
+  </tr>
+  <tr>
+    <td><tt>source_url</tt></td>
+    <td>String</td>
+    <td>Group of users that own zookeeper</td>
+    <td><tt></tt></td>
+  </tr>
+  <tr>
+    <td><tt>install_path</tt></td>
+    <td>String</td>
+    <td>Zookeeper installation path</td>
+    <td><tt></tt></td>
+  </tr>
+  <tr>
+    <td><tt>version</tt></td>
+    <td>String</td>
+    <td>Zookeeper package version</td>
+    <td><tt></tt></td>
+  </tr>
+  <tr>
+    <td><tt>data_path</tt></td>
+    <td>String</td>
+    <td>Zookeeper data path</td>
+    <td><tt></tt></td>
+  </tr>
+  <tr>
+    <td><tt>log_path</tt></td>
+    <td>String</td>
+    <td>Zookeeper log path</td>
+    <td><tt></tt></td>
+  </tr>
+  <tr>
+    <td><tt>config_path</tt></td>
+    <td>String</td>
+    <td>Zookeeper config path</td>
+    <td><tt></tt></td>
+  </tr>
+  <tr>
+    <td><tt>action</tt></td>
+    <td>Symbol</td>
+    <td>Resource actions (:install || :configure)</td>
+    <td><tt>:install</tt></td>
   </tr>
 </table>
 
 ## Usage
 
-#### zookeeper::default
+#### (LWRP) omc_zookeeper_config
 TODO: Write usage instructions for each cookbook.
 
 e.g.
