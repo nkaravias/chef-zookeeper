@@ -1,0 +1,19 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+  require_chef_omnibus: 12.4.1
+  http_proxy: http://www-proxy.us.oracle.com:80
+  https_proxy: http://www-proxy.us.oracle.com:80
+
+platforms:
+  - name: slapchop-oel-65-full
+
+suites:
+  - name: default
+    run_list:
+      - recipe[zookeeper::default]
+    attributes:
+

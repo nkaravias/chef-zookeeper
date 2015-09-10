@@ -1,0 +1,114 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides: zookeeper
+# Required-Start:	$syslog $local_fs $remote_fs $network
+# Required-Stop:	$syslog $local_fs $remote_fs $network
+# Default-Start:	2 3 4 5
+# Default-Stop:		0 1 6
+# Short-Description: Zookeeper distributed coordination server
+### END INIT INFO
+
+#
+# init.d / servicectl compatibility (openSUSE)
+#
+if [ -f /etc/rc.status ]; then
+    . /etc/rc.status
+    rc_reset
+fi
+
+#
+# Source function library.
+#
+if [ -f /etc/rc.d/init.d/functions ]; then
+    . /etc/rc.d/init.d/functions
+fi
+
+prog=zookeeper
+PIDFILE=/var/run/$prog.pid
+lockfile=/var/lock/subsys/$prog
+DESC="Zookeeper distributed coordination server"
+start() {
+
+	export SERVER_JVMFLAGS="-Xms256m -Xmx1024m "
+	export PATH=/usr/java/latest/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+	export ZOO_LOG_DIR=<%=@log_dir%>
+	#export ZOO_LOG_DIR={{ salt['pillar.get']('zookeeper:config:log_dir', False)}}
+	export ZOO_LOG4J_PROP=INFO,ROLLINGFILE
+	export ZOOPIDFILE=<%=@data_dir%>/zookeeper_server.pid
+	#export ZOOPIDFILE={{ salt['pillar.get']('zookeeper:config:data_dir', False)}}/zookeeper_server.pid
+	#export ZOOBINDIR=/usr/lib/zookeeper/bin
+	export ZOOBINDIR=<%=@install_dir%>/bin
+	#export ZOOBINDIR={{salt['pillar.get']('zookeeper:prefix')}}/zookeeper/bin
+	#export ZOOCFGDIR=/etc/zookeeper/conf
+	export ZOOCFGDIR=<%=@config_dir%>
+
+	echo -n "Starting $DESC" "$prog"
+	daemon --pidfile $PIDFILE "nohup ${ZOOBINDIR}/zkServer.sh start-foreground ${ZOOCFGDIR}/zoo.cfg > ${ZOO_LOG_DIR}/startup.log 2>&1 & echo \$! > $PIDFILE"
+	retval=$?
+	echo
+	[ $retval -eq 0 ] && touch $lockfile
+	return $retval
+}
+
+stop() {
+	echo -n "Stopping $DESC" "$prog"
+	killproc -p $PIDFILE -d 20 $prog
+	retval=$?
+	echo
+	[ $retval -eq 0 ] && rm -f $lockfile
+	return $retval
+}
+
+restart() {
+	stop
+	start
+}
+
+reload() {
+	restart
+}
+
+force_reload() {
+	restart
+}
+
+rh_status() {
+	status -p $PIDFILE $prog
+}
+
+rh_status_q() {
+	rh_status >/dev/null 2>&1
+}
+
+case "$1" in
+	start)
+		rh_status_q && exit 0
+		$1
+		;;
+	stop)
+		rh_status_q || exit 0
+		$1
+		;;
+	restart)
+		$1
+		;;
+	reload)
+		rh_status_q || exit 7
+		$1
+		;;
+	force-reload)
+		force_reload
+		;;
+	status)
+		rh_status
+		;;
+	condrestart|try-restart)
+		rh_status_q || exit 0
+		restart
+		;;
+	*)
+		echo "$Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+		exit 2
+esac
+exit $?
+
