@@ -13,17 +13,26 @@
 include_recipe 'java'
 
 omc_zookeeper_node 'zookeeper' do
-  user 'zookeeper'
-  group 'zookeeper'
-  source_url 'http://www.us.apache.org/dist/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz'
-  install_path '/opt/zookeeper'
-  version '3.4.6'
-  data_path '/scratch/zookeeper/data'
-  log_path '/var/log/zookeeper'
-  config_path '/opt/zookeeper/conf'
-  action [:install, :configure]
+  #user 'zookeeper'
+  #group 'zookeeper'
+  #source_url 'http://www.us.apache.org/dist/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz'
+  #install_path '/opt/zookeeper'
+  #version '3.4.6'
+  
+  #data_path '/scratch/zookeeper/data'
+  #log_path '/var/log/zookeeper'
+  #config_path '/opt/zookeeper/conf'
+  action :install
 end
 
+omc_zookeeper_config ::File.join('/opt/zookeeper/conf', 'zoo.cfg') do
+  #ensemble ['default-oel65-chef-java','zoooooo']
+  ensemble_data_bag_info 'zookeeper' => 'zookeeper_localdev'
+  #ensemble_data_bag_info 'zookeeper' => 'old_array'
+  instance node.hostname.downcase
+  #override_config '#test' => 5
+end
+=begin
 omc_zookeeper_config ::File.join('/opt/zookeeper/conf', 'zoo.cfg') do
   ensemble ['default-oel65-chef-java']
   instance node.hostname.downcase
@@ -36,3 +45,4 @@ omc_zookeeper_config ::File.join('/opt/zookeeper/conf', 'zoo.cfg') do
   user 'zookeeper'
   action :render
 end
+=end

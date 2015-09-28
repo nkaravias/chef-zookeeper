@@ -35,26 +35,8 @@ action :install do
     create_directory(dir, new_resource.user, new_resource.group)
   end
 end
-
-action :configure do
-  service new_resource.service_name do
-    supports :restart => true, :start => true, :stop => true, :reload => true
-    action :nothing
-  end 
-
-  template "Init.d script for #{new_resource.service_name}" do
-    path "/etc/init.d/#{new_resource.service_name}"
-    source 'init/zookeeper.erb'
-    owner new_resource.user
-    group new_resource.group
-    mode '0755'
-    cookbook 'omc_zookeeper'
-    notifies :enable, "service[#{new_resource.service_name}]"
-    notifies :start, "service[#{new_resource.service_name}]"
-    variables( :install_dir => new_resource.install_path, :data_dir => new_resource.data_path, :log_dir => new_resource.log_path, :config_dir => new_resource.config_path)
-  end
-end
-
+=begin
+=end
 def download_package(source, url)
   remote_file source do
     source url
@@ -65,6 +47,8 @@ def download_package(source, url)
   end
 end
 
+
+# FIX THIS - pass user - group ffs...
 def extract_package(name,source,destination)
   execute "Extract #{name} to #{destination}" do
     cwd destination
@@ -97,6 +81,8 @@ def load_current_resource
   @current_resource = Chef::Resource::OmcZookeeperNode.new(@new_resource.name)
   @current_resource.user(@new_resource.user)
   @current_resource.group(@new_resource.group)
+  @current_resource.shell(@new_resource.shell)
+  @current_resource.home(@new_resource.home)
   @current_resource.source_url(@new_resource.source_url)
   @current_resource.version(@new_resource.version)
   @current_resource.install_path(@new_resource.install_path)
@@ -104,3 +90,23 @@ def load_current_resource
   @current_resource.log_path(@new_resource.log_path)
   @current_resource.config_path(@new_resource.config_path)
 end
+=begin
+action :configure do
+  service new_resource.service_name do
+    supports :restart => true, :start => true, :stop => true, :reload => true
+    action :nothing
+  end
+
+  template "Init.d script for #{new_resource.service_name}" do
+    path "/etc/init.d/#{new_resource.service_name}"
+    source 'init/zookeeper.erb'
+    owner new_resource.user
+    group new_resource.group
+    mode '0755'
+    cookbook 'omc_zookeeper'
+    notifies :enable, "service[#{new_resource.service_name}]"
+    notifies :start, "service[#{new_resource.service_name}]"
+    variables( :install_dir => new_resource.install_path, :data_dir => new_resource.data_path, :log_dir => new_resource.log_path, :config_dir => new_resource.config_path)
+  end
+end
+=end

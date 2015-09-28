@@ -1,1 +1,15 @@
-<%=@config%>
+# DEBUG: Contents of @config hash
+# <%= @config %>
+# Static rendering
+<% rendered =['quorumPort','leaderPort'] %>
+<%= render(@config, 'tickTime', '=').strip -%><%- rendered << 'tickTime' -%>
+<%= render(@config, 'initLimit', '=').strip -%><%- rendered << 'initLimit'  -%>
+<%= render(@config, 'syncLimit', '=').strip -%><%- rendered << 'syncLimit'  -%>
+<%= render(@config, 'clientPort', '=').strip -%><%- rendered << 'clientPort'  -%>
+<%= render(@config, 'dataDir', '=').strip -%><%- rendered << 'dataDir'  -%>
+# Dynamic rendering
+<% @config.each do |k,v| %>
+  <% unless rendered.include?(k) %>
+<%= render(@config, k, "=") -%> 
+  <% end %> 
+<% end %>
