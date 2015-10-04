@@ -29,32 +29,29 @@ action :install do
   end
 
   download_package(zk_local_archive_path, new_resource.source_url)
-  extract_package(zk_archive, zk_local_archive_path,zk_install_root)
+  extract_package(zk_archive, zk_local_archive_path, zk_install_root)
   create_link(::File.join(zk_install_root, zk_archive), new_resource.install_path)
   [ new_resource.data_path, new_resource.log_path, new_resource.config_path ].each do |dir|
     create_directory(dir, new_resource.user, new_resource.group)
   end
 end
-=begin
-=end
+
 def download_package(source, url)
   remote_file source do
     source url
     owner new_resource.user
     group new_resource.group
     mode '0644'
-    not_if { zk_installed?(current_resource.install_path,current_resource.version) }
+    not_if { zk_installed?(current_resource.install_path, current_resource.version) }
   end
 end
 
-
-# FIX THIS - pass user - group ffs...
 def extract_package(name,source,destination)
   execute "Extract #{name} to #{destination}" do
     cwd destination
-    command "tar zxvf #{source} -C .; chown zookeeper:zookeeper ./#{name}"
+    command "tar zxvf #{source} -C .; chown #{new_resource.user}:#{new_resource.group} ./#{name}*"
     action :run
-    not_if { zk_installed?(current_resource.install_path,current_resource.version) }
+    not_if { zk_installed?(current_resource.install_path, current_resource.version) }
   end
 end
 
@@ -63,7 +60,7 @@ def create_link(source,target)
     to source
     owner new_resource.user
     group new_resource.group
-    not_if { zk_installed?(current_resource.install_path,current_resource.version) }
+    not_if { zk_installed?(current_resource.install_path ,current_resource.version) }
   end
 end
 
@@ -90,23 +87,3 @@ def load_current_resource
   @current_resource.log_path(@new_resource.log_path)
   @current_resource.config_path(@new_resource.config_path)
 end
-=begin
-action :configure do
-  service new_resource.service_name do
-    supports :restart => true, :start => true, :stop => true, :reload => true
-    action :nothing
-  end
-
-  template "Init.d script for #{new_resource.service_name}" do
-    path "/etc/init.d/#{new_resource.service_name}"
-    source 'init/zookeeper.erb'
-    owner new_resource.user
-    group new_resource.group
-    mode '0755'
-    cookbook 'omc_zookeeper'
-    notifies :enable, "service[#{new_resource.service_name}]"
-    notifies :start, "service[#{new_resource.service_name}]"
-    variables( :install_dir => new_resource.install_path, :data_dir => new_resource.data_path, :log_dir => new_resource.log_path, :config_dir => new_resource.config_path)
-  end
-end
-=end

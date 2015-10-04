@@ -24,11 +24,14 @@ action :render do
   # If the hash has more than one key - abort
   ensemble_data_bag = new_resource.ensemble_data_bag_info.keys.first
   ensemble = data_bag_item(ensemble_data_bag, new_resource.ensemble_data_bag_info[ensemble_data_bag])
+
   puts "ensemble hosts: #{ensemble['hosts']}"
 
   #servers = ensemble.inject({}) {|hash, host| hash["server.#{ensemble.index(host).next}"] = "#{host == new_resource.instance ? '0.0.0.0' : host}:#{quorum_port}:#{leader_port}"; hash}
   active_ensemble = ensemble['hosts'].reject { |c| c['status'] != 'ACTIVE' }
+  # Add a check: parse the databag - if there's duplicate active hosts - raise an exception
   servers = active_ensemble.inject({}) {|hash, host| hash["server.#{host['id']}"] = "#{host['hostname'] == new_resource.instance ? '0.0.0.0' : host['hostname']}:#{quorum_port}:#{leader_port}"; hash}
+  puts "servers #{servers}"
 
   
   
@@ -65,11 +68,18 @@ action :render do
   end
 
   # Merge configuration with overriden values
+  default_config= new_resource.default_config.merge(new_resource.override_config)
+  default_config['dataDir']= new_resource.data_path
+  default_config['clientPort']= new_resource.client_port
+  default_config['quorumPort']= new_resource.quorum_port
+  default_config['leaderPort']= new_resource.leader_port
+=begin
   default_config= new_resource.default_config.merge!(new_resource.override_config)
   default_config['dataDir']= new_resource.data_path
   default_config['clientPort']= new_resource.client_port
   default_config['quorumPort']= new_resource.quorum_port
   default_config['leaderPort']= new_resource.leader_port
+=end
   # Merge server list: servers{}
   default_config.merge!(servers)
   ### + Check if mandatory attributes are not overriden...   
