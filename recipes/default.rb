@@ -29,13 +29,13 @@ omc_zookeeper_config ::File.join('/opt/zookeeper/conf', 'zoo.cfg') do
   #ensemble ['default-oel65-chef-java','zoooooo']
   ensemble_data_bag_info 'zookeeper' => 'zookeeper_localdev'
   #ensemble_data_bag_info 'zookeeper' => 'old_array'
-  instance node.hostname.downcase
+  instance node.fqdn.downcase
   #override_config '#test' => 5
 end
 =begin
 omc_zookeeper_config ::File.join('/opt/zookeeper/conf', 'zoo.cfg') do
   ensemble ['default-oel65-chef-java']
-  instance node.hostname.downcase
+  instance node.fqdn.downcase
   config 'clientPort' => '2181', 'initLimit' => '10', 'syncLimit' => '5', 'tickTime' => '2000'
   client_port '2181'
   quorum_port '2888'

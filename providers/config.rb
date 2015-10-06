@@ -31,33 +31,7 @@ action :render do
   active_ensemble = ensemble['hosts'].reject { |c| c['status'] != 'ACTIVE' }
   # Add a check: parse the databag - if there's duplicate active hosts - raise an exception
   servers = active_ensemble.inject({}) {|hash, host| hash["server.#{host['id']}"] = "#{host['hostname'] == new_resource.instance ? '0.0.0.0' : host['hostname']}:#{quorum_port}:#{leader_port}"; hash}
-  puts "servers #{servers}"
-
-  
-  
-
-#testing
-=begin
-  ens = [{"id"=>15, "hostname"=>"default-oel65-chef-java", "status"=>"ACTIVE"},
-{"id"=>2, "hostname"=>"test02", "status"=>"ACTIVE"},
-{"id"=>3, "hostname"=>"test03", "status"=>"DECOMISSIONED"},
-{"id"=>4, "hostname"=>"test03", "status"=>"ACTIVE"},
-{"id"=>5, "hostname"=>"test03", "status"=>"ACTIVE"}
-]
-  
-  puts "ensemble #{ensemble}"
-  active_ensemble = ens.reject { |c| c['status'] != 'ACTIVE' }
-  test_servers = active_ensemble.inject({}) {|hash, host| hash["server.#{host['id']}"] = "#{host['hostname'] == new_resource.instance ? '0.0.0.0' : host['hostname']}:#{quorum_port}:#{leader_port}"; hash}
-  
-  puts "test servers #{test_servers}"
-  #servers = [ "server.100:0.0.0.0:2888:3888" ]
-=end
-# end testing
-
-  #zk_id =  get_zk_id(ensemble, new_resource.instance)
-  #zk_id = "1"
   zk_id =  get_zk_id(active_ensemble, new_resource.instance).to_s
-
 
   file "Zookeeper config for #{data_path}/myid" do
     path ::File.join(data_path, 'myid')
@@ -73,13 +47,6 @@ action :render do
   default_config['clientPort']= new_resource.client_port
   default_config['quorumPort']= new_resource.quorum_port
   default_config['leaderPort']= new_resource.leader_port
-=begin
-  default_config= new_resource.default_config.merge!(new_resource.override_config)
-  default_config['dataDir']= new_resource.data_path
-  default_config['clientPort']= new_resource.client_port
-  default_config['quorumPort']= new_resource.quorum_port
-  default_config['leaderPort']= new_resource.leader_port
-=end
   # Merge server list: servers{}
   default_config.merge!(servers)
   ### + Check if mandatory attributes are not overriden...   
@@ -127,46 +94,4 @@ def load_current_resource
   @current_resource.default_config(@new_resource.default_config)
   @current_resource.override_config(@new_resource.override_config)
 end
-
-
-
-
-
-
-=begin
-  instance = new_resource.instance
-  config_path = new_resource.config_path
-  data_path = new_resource.data_path
-  client_port = new_resource.client_port
-  quorum_port = new_resource.quorum_port
-  leader_port = new_resource.leader_port
-
-  servers = ensemble.map { |n| "server.#{ensemble.index(n).next}:#{n == instance ? '0.0.0.0' : n}:#{quorum_port}:#{leader_port}" }
-  zk_content =  { 'dataDir' => data_path,
- 'clientPort' => client_port }.merge(new_resource.config).map { |kv| kv.join('=') }.concat(servers).join("\n")
-  zk_id =  get_zk_id(ensemble, instance)
-  
-  service new_resource.service_name do
-    action :nothing
-  end
-
-  file "Zookeeper config for #{data_path}/myid" do
-    path ::File.join(data_path, 'myid')
-    owner new_resource.user
-    group new_resource.group
-    mode '0755'
-    content(zk_id) 
-  end
-
-  template "Zookeeper config for #{config_path}/zoo.cfg" do
-    path ::File.join(config_path, 'zoo.cfg')
-    source 'config/zoo.cfg.erb'
-    owner new_resource.user
-    group new_resource.group
-    cookbook "omc_zookeeper"
-    mode '0755'
-    variables( :config => zk_content)
-    notifies :restart, "service[#{new_resource.service_name}]"
-  end
-=end
 end
