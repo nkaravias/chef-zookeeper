@@ -19,15 +19,9 @@ action :render do
   quorum_port = new_resource.quorum_port
   leader_port = new_resource.leader_port
 
-  #ensemble = new_resource.ensemble
-  # Parse the databag for the ensemble hosts
-  # If the hash has more than one key - abort
   ensemble_data_bag = new_resource.ensemble_data_bag_info.keys.first
   ensemble = data_bag_item(ensemble_data_bag, new_resource.ensemble_data_bag_info[ensemble_data_bag])
 
-  puts "ensemble hosts: #{ensemble['hosts']}"
-
-  #servers = ensemble.inject({}) {|hash, host| hash["server.#{ensemble.index(host).next}"] = "#{host == new_resource.instance ? '0.0.0.0' : host}:#{quorum_port}:#{leader_port}"; hash}
   active_ensemble = ensemble['hosts'].reject { |c| c['status'] != 'ACTIVE' }
   # Add a check: parse the databag - if there's duplicate active hosts - raise an exception
   servers = active_ensemble.inject({}) {|hash, host| hash["server.#{host['id']}"] = "#{host['hostname'] == new_resource.instance ? '0.0.0.0' : host['hostname']}:#{quorum_port}:#{leader_port}"; hash}
@@ -47,7 +41,6 @@ action :render do
   default_config['clientPort']= new_resource.client_port
   default_config['quorumPort']= new_resource.quorum_port
   default_config['leaderPort']= new_resource.leader_port
-  # Merge server list: servers{}
   default_config.merge!(servers)
   ### + Check if mandatory attributes are not overriden...   
   
@@ -72,9 +65,11 @@ action :render do
     cookbook 'omc_zookeeper'
     notifies :enable, "service[#{new_resource.service_name}]"
     notifies :start, "service[#{new_resource.service_name}]"
-    variables( :install_dir => new_resource.install_path, :data_dir => new_resource.data_path, :log_dir => new_resource.log_path, :config_dir => new_resource.config_path)
+    variables( :install_dir => new_resource.install_path, :data_dir => new_resource.data_path, :log_dir => new_resource.log_path, :config_dir => new_resource.config_path, :user => new_resource.user)
   end
 
+  new_resource.updated_by_last_action(true)
+end
 
 def load_current_resource
   @current_resource = Chef::Resource::OmcZookeeperConfig.new(@new_resource.name)
@@ -88,10 +83,8 @@ def load_current_resource
   @current_resource.data_path(@new_resource.data_path)
   @current_resource.log_path(@new_resource.log_path)
   @current_resource.install_path(@new_resource.install_path)
-  #@current_resource.ensemble(@new_resource.ensemble)
   @current_resource.ensemble_data_bag_info(@new_resource.ensemble_data_bag_info)
   @current_resource.instance(@new_resource.instance)
   @current_resource.default_config(@new_resource.default_config)
   @current_resource.override_config(@new_resource.override_config)
-end
 end

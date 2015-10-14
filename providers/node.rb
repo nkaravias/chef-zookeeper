@@ -34,6 +34,9 @@ action :install do
   [ new_resource.data_path, new_resource.log_path, new_resource.config_path ].each do |dir|
     create_directory(dir, new_resource.user, new_resource.group)
   end
+
+  # state has changed - notify
+  new_resource.updated_by_last_action(true)
 end
 
 def download_package(source, url)
@@ -46,7 +49,7 @@ def download_package(source, url)
   end
 end
 
-def extract_package(name,source,destination)
+def extract_package(name, source, destination)
   execute "Extract #{name} to #{destination}" do
     cwd destination
     command "tar zxvf #{source} -C .; chown #{new_resource.user}:#{new_resource.group} ./#{name}*"
@@ -55,16 +58,16 @@ def extract_package(name,source,destination)
   end
 end
 
-def create_link(source,target)
+def create_link(source, target)
   link target do
     to source
     owner new_resource.user
     group new_resource.group
-    not_if { zk_installed?(current_resource.install_path ,current_resource.version) }
+    not_if { zk_installed?(current_resource.install_path, current_resource.version) }
   end
 end
 
-def create_directory(path,zk_owner,zk_group)
+def create_directory(path, zk_owner, zk_group)
   directory path do
     owner zk_owner
     group zk_group

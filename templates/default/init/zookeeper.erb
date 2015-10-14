@@ -32,15 +32,11 @@ start() {
 	export SERVER_JVMFLAGS="-Xms256m -Xmx1024m "
 	export PATH=/usr/java/latest/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 	export ZOO_LOG_DIR=<%=@log_dir%>
-	#export ZOO_LOG_DIR={{ salt['pillar.get']('zookeeper:config:log_dir', False)}}
 	export ZOO_LOG4J_PROP=INFO,ROLLINGFILE
-	export ZOOPIDFILE=<%=@data_dir%>/zookeeper_server.pid
-	#export ZOOPIDFILE={{ salt['pillar.get']('zookeeper:config:data_dir', False)}}/zookeeper_server.pid
-	#export ZOOBINDIR=/usr/lib/zookeeper/bin
+	export ZOOPIDFILE=/var/run/zookeeper/zookeeper.pid
 	export ZOOBINDIR=<%=@install_dir%>/bin
-	#export ZOOBINDIR={{salt['pillar.get']('zookeeper:prefix')}}/zookeeper/bin
-	#export ZOOCFGDIR=/etc/zookeeper/conf
 	export ZOOCFGDIR=<%=@config_dir%>
+        #export ZOOUSR=<%=@user%>
 
 	echo -n "Starting $DESC" "$prog"
 	daemon --pidfile $PIDFILE "nohup ${ZOOBINDIR}/zkServer.sh start-foreground ${ZOOCFGDIR}/zoo.cfg > ${ZOO_LOG_DIR}/startup.log 2>&1 & echo \$! > $PIDFILE"
