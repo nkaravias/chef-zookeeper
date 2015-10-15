@@ -65,7 +65,7 @@ action :render do
     cookbook 'omc_zookeeper'
     notifies :enable, "service[#{new_resource.service_name}]"
     notifies :start, "service[#{new_resource.service_name}]"
-    variables( :install_dir => new_resource.install_path, :data_dir => new_resource.data_path, :log_dir => new_resource.log_path, :config_dir => new_resource.config_path, :user => new_resource.user)
+    variables( :install_dir => new_resource.install_path, :data_dir => new_resource.data_path, :log_dir => new_resource.log_path, :config_dir => new_resource.config_path, :user => new_resource.user, :group => new_resource.group)
   end
 
   new_resource.updated_by_last_action(true)

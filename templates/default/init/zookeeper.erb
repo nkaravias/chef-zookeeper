@@ -24,7 +24,8 @@ if [ -f /etc/rc.d/init.d/functions ]; then
 fi
 
 prog=zookeeper
-PIDFILE=/var/run/$prog.pid
+ZOOPIDDIR=/var/run/zookeeper
+ZOOPIDFILE=$ZOOPIDDIR/$prog.pid
 lockfile=/var/lock/subsys/$prog
 DESC="Zookeeper distributed coordination server"
 start() {
@@ -33,13 +34,22 @@ start() {
 	export PATH=/usr/java/latest/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 	export ZOO_LOG_DIR=<%=@log_dir%>
 	export ZOO_LOG4J_PROP=INFO,ROLLINGFILE
-	export ZOOPIDFILE=/var/run/zookeeper/zookeeper.pid
 	export ZOOBINDIR=<%=@install_dir%>/bin
 	export ZOOCFGDIR=<%=@config_dir%>
-        #export ZOOUSR=<%=@user%>
+        export ZOOUSR=<%=@user%>
+        export ZOOGRP=<%=@group%>
+
+
+        # Ensure that the ZOOPIDDIR exists
+        if [ -n "$ZOOPIDDIR" ] && [ ! -e "$ZOOPIDDIR" ]; then
+            mkdir -p "$ZOOPIDDIR" && chown "$ZOOUSR":"$ZOOUSR" "$ZOOPIDDIR"
+        fi
+        if [ -n "$ZOOPIDFILE" ] && [ ! -e "$ZOOPIDFILE" ]; then
+            touch "$ZOOPIDFILE" && chown "$ZOOUSR":"$ZOOUSR" "$ZOOPIDFILE"
+        fi
 
 	echo -n "Starting $DESC" "$prog"
-	daemon --pidfile $PIDFILE "nohup ${ZOOBINDIR}/zkServer.sh start-foreground ${ZOOCFGDIR}/zoo.cfg > ${ZOO_LOG_DIR}/startup.log 2>&1 & echo \$! > $PIDFILE"
+	daemon --user $ZOOUSR --pidfile $ZOOPIDFILE "nohup ${ZOOBINDIR}/zkServer.sh start-foreground ${ZOOCFGDIR}/zoo.cfg > ${ZOO_LOG_DIR}/startup.log 2>&1 & echo \$! > $ZOOPIDFILE"
 	retval=$?
 	echo
 	[ $retval -eq 0 ] && touch $lockfile
@@ -48,7 +58,7 @@ start() {
 
 stop() {
 	echo -n "Stopping $DESC" "$prog"
-	killproc -p $PIDFILE -d 20 $prog
+	killproc -p $ZOOPIDFILE -d 20 $prog
 	retval=$?
 	echo
 	[ $retval -eq 0 ] && rm -f $lockfile
@@ -69,7 +79,7 @@ force_reload() {
 }
 
 rh_status() {
-	status -p $PIDFILE $prog
+	status -p $ZOOPIDFILE $prog
 }
 
 rh_status_q() {
