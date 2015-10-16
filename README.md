@@ -6,6 +6,36 @@ Exposes two LWRPs for installing and configuring a zookeeper node (omc_zookeeper
 
 This coobook requires Java and uses the relevant cookbook to install it. The dependency is defined in the Berksfile & metadata.rb
 
+#Data bags:
+* All zookeeper nodes much get added to the data bag item that gets passed to the omc_kafka_config resource as the ensemble_data_bag_info hash attribute. The data bag item should look like this:
+```json
+{
+ "id": "zookeeper_localdev",
+ "environment": "localdev",
+ "use": "slapchop",
+ "hosts": [{ "id": 1, "hostname": "default-oel65-chef-java", "status": "ACTIVE" },{ "id":2, "hostname": "test02" , "status": "DECOMISSIONED" },{ "id":3, "hostname": "test03" , "status": "DECOMISSIONED" }]
+}
+```
+Short breakdown of the hosts hash contents and usage:
+<table>
+  <tr>
+    <th>Key</th>
+    <th>Value description</th>
+  </tr>
+  <tr>
+    <td>id</td>
+    <td>The zookeeper node id (0-255) should be used and be considered immutable. This value cannot be reused in an active ensemble</td>
+  </tr>
+  <tr>
+    <td>hostname</td>
+    <td>The FQDN of the zookeeper node</td>
+  </tr>  
+  <tr>
+    <td>Status</td>
+    <td>The state of the zookeeper node. If it is a member of a live ensemble then the value should be ACTIVE. In any other case set to any string but ACTIVE, e.g DECOMISSIONED, INVALID. When adding a net new node you should never be using the same myid</td>
+  </tr>  
+</table>
+
 ## Attributes
 
 [:config][:ensemble] = [] # csv list of hostnames that are part of the zookeeper ensemble\n
@@ -130,16 +160,8 @@ Just include `zookeeper` in your node's `run_list`:
 
 ## Contributing
 
-TODO: (optional) If this is a public cookbook, detail the process for contributing. If this is a private cookbook, remove this section.
-
-e.g.
-1. Fork the repository on Github
-2. Create a named feature branch (like `add_component_x`)
-3. Write your change
-4. Write tests for your change (if applicable)
-5. Run the tests, ensuring they all pass
-6. Submit a Pull Request using Github
-
-## License and Authors
-
-Authors: TODO: List authors
+1. Create a named feature branch (adding any relevant Jira ID as a prefix is the recommended approach).If you do not have access reach out to the OMC Eloqua DevOps team at erd_devops_us_grp@oracle.com
+2. Write your change
+3. Write tests for your change (Unit / Integration if applicable)
+4. Run the tests, ensuring they all pass
+5. Submit a Pull Request
