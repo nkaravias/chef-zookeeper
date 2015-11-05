@@ -1,8 +1,8 @@
 ---
 driver:
   name: docker
-  http_proxy: http://den00bjg.us.oracle.com:8123
-  https_proxy: http://den00bjg.us.oracle.com:8123
+  http_proxy: http://den00bjg.us.oracle.com:8124
+  https_proxy: http://den00bjg.us.oracle.com:8124
 
 driver_config:
   sudo: false
@@ -14,8 +14,8 @@ provisioner:
   name: chef_zero
   use_sudo: false
   client_rb:
-    http_proxy: http://den00bjg.us.oracle.com:8123
-    https_proxy: http://den00bjg.us.oracle.com:8123
+    http_proxy: http://den00bjg.us.oracle.com:8124
+    https_proxy: http://den00bjg.us.oracle.com:8124
     no_proxy: localhost,127.0.0.1
 
 platforms:
@@ -26,6 +26,7 @@ platforms:
     require_chef_omnibus: 11.16.4
     image: oracle/oel67:1.0
     platform: rhel
+    hostname: default-oel65-chef-java
     forward:
       - 2181:2181
 
