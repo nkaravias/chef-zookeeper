@@ -65,7 +65,8 @@ action :render do
     cookbook 'omc_zookeeper'
     notifies :enable, "service[#{new_resource.service_name}]"
     notifies :start, "service[#{new_resource.service_name}]"
-    variables( :install_dir => new_resource.install_path, :data_dir => new_resource.data_path, :log_dir => new_resource.log_path, :config_dir => new_resource.config_path, :user => new_resource.user, :group => new_resource.group)
+    variables( :install_dir => new_resource.install_path, :data_dir => new_resource.data_path, :log_dir => new_resource.log_path, :config_dir => new_resource.config_path, :user => new_resource.user, :group => new_resource.group, :java_opts => new_resource.java_opts)
+    notifies :restart, "service[#{new_resource.service_name}]"
   end
 
   new_resource.updated_by_last_action(true)
@@ -87,4 +88,5 @@ def load_current_resource
   @current_resource.instance(@new_resource.instance)
   @current_resource.default_config(@new_resource.default_config)
   @current_resource.override_config(@new_resource.override_config)
+  @current_resource.java_opts(@new_resource.java_opts)
 end

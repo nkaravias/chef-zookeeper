@@ -29,6 +29,7 @@
         "quorum_port": 2888,
         "leader_port": 3888,
         "service_name": "zookeeper",
+        "java_opts": "-Xms387m -Xmx1g",
         "override_config": {
 
         }

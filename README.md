@@ -160,7 +160,7 @@ Just include `zookeeper` in your node's `run_list`:
 
 ## Contributing
 
-1. Create a named feature branch (adding any relevant Jira ID as a prefix is the recommended approach).If you do not have access reach out to the OMC Eloqua DevOps team at erd_devops_us_grp@oracle.com
+1. Create a named feature branch (adding any relevant Jira ID as a prefix is the recommended approach)
 2. Write your change
 3. Write tests for your change (Unit / Integration if applicable)
 4. Run the tests, ensuring they all pass

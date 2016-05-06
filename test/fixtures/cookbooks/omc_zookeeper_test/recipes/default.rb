@@ -23,5 +23,6 @@ omc_zookeeper_config ::File.join('/opt/zookeeper/conf', 'zoo.cfg') do
   log_path node[:omc_zookeeper][:log_path]
   config_path node[:omc_zookeeper][:config_path]
   override_config node[:omc_zookeeper][:override_config]
+  java_opts node[:omc_zookeeper][:java_opts]
   action :render
 end

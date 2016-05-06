@@ -26,3 +26,4 @@ attribute(:default_config, kind_of: Hash, default: {
 })
 # Override
 attribute(:override_config, kind_of: Hash, default: {})
+attribute :java_opts, kind_of: String, default: '-Xms256M -Xmx512M'
